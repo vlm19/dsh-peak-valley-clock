@@ -4,6 +4,11 @@
   "description": "Peak/valley tariff reminder plugin for DeepSeek Harness: a single-character badge in the shell overlay, optional 6s video on click.",
   "type": "module",
   "license": "MIT",
+  "author": "vlm",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vlm19/dsh-peak-valley-clock.git"
+  },
   "keywords": [
     "dsh-plugin",
     "deepseek-harness",

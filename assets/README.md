@@ -9,6 +9,7 @@ out of the box:
 - `feng.mp4` — peak-hours video (orange badge tier)
 - `gu.mp4` — off-peak video (teal badge tier)
 
-These are AI-generated clips of a person; their redistribution terms are NOT
-covered by the repository's MIT license. See the top-level `LICENSE` file and
-the README "Swapping the videos" section before redistributing.
+These are AI-generated clips derived from online AI photos (no real-person
+likeness); their redistribution terms are NOT covered by the repository's MIT
+license. See the top-level `LICENSE` file and the README "Swapping the videos"
+section before redistributing.
