@@ -43,8 +43,8 @@
     "assets/*.mp4"
   ],
   "scripts": {
-    "build": "tsdown",
-    "typecheck": "tsc -p tsconfig.json",
+    "build": "tsc -b && tsdown",
+    "typecheck": "tsc -b",
     "test": "vitest run"
   },
   "peerDependencies": {
@@ -64,11 +64,9 @@
     "@deepseek-ai/cordis": "workspace:^",
     "@types/node": "^22.20.0",
     "@types/react": "~18.3.1",
-    "react": "^18.2.0",
     "tsdown": "^0.12.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0",
-    "zustand": "~4.4.7"
+    "vitest": "^2.1.0"
   },
   "dependencies": {
     "react": "^18.2.0",

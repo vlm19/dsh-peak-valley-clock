@@ -4,7 +4,6 @@
  * the local clock against the tariff schedule; the engine is a zustand
  * store the panel subscribes to.
  */
-import { useEffect, useState } from 'react'
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 // Pulls the shell.overlay SlotMap merge from ui-layout's browser half so the
@@ -78,7 +77,7 @@ function createBinding(ctx: ClientContext, config: Required<PeakValleyConfig>, p
   if (initial.sound === undefined) prefs.set({ sound: config.defaultSound })
 
   function getActiveLocaleId(): 'zh' | 'en' {
-    const id = ctx.locale.getActiveId?.() ?? 'zh'
+    const id = ctx.locale.getLocale().active
     return id === 'en' ? 'en' : 'zh'
   }
   function videoFor(tier: TariffTier): string | undefined {
@@ -139,9 +138,9 @@ export function apply(ctx: ClientContext): void {
           readState: binding.engine.getState,
         }),
       } as never,
-      function BoundPanel(p) {
+      function BoundPanel(p: any) {
         // The host sets `defaultCorner` from config at the call site.
-        return Panel({ ...(p as never), defaultCorner: config.corner } as never)
+        return Panel({ ...p, defaultCorner: config.corner } as any)
       },
     ),
   )

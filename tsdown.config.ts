@@ -1,18 +1,11 @@
-import { defineConfig } from 'tsdown'
+import { clientBundle } from '../../client/tsdown.client.ts'
 
-// Self-contained bundle for the plugin. The harness build pipeline
-// (`pnpm run build:lib:client` inside a deepseek-harness workspace) is the
-// authoritative producer of lib/client.js; this config lets the repo build
-// standalone when the harness packages are available (workspace or git dep).
-export default defineConfig({
-  entry: [
-    'src/index.ts',
-    'src/invariant.ts',
-    'src/client/index.ts',
-  ],
-  outDir: 'lib',
-  format: 'esm',
-  target: 'es2022',
-  dts: false,
-  clean: false,
-})
+// Builds both halves via the shared harness preset used by every client
+// package. The browser client bundle is emitted as lib/client.js and loaded by
+// the harness web from /plugins/dsh-peak-valley-clock/client.js. Node-half
+// entries are the compiled lib/types outputs; the client entry
+// (lib/types/client/index.js) is added automatically by clientBundle.
+export default clientBundle('dsh-peak-valley-clock', [
+  'lib/types/index.js',
+  'lib/types/invariant.js',
+])
