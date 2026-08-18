@@ -4,3 +4,7 @@ lib/
 .DS_Store
 .env
 .env.*
+
+# Reasonix agent tool local state (never commit to the cloud)
+.reasonix/
+reasonix.toml
