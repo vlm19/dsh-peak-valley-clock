@@ -11,13 +11,11 @@ export interface PeakValleyPrefs {
   corner: Corner
   /** Last user-picked sound state. */
   sound: boolean
-  /** Collapsed to a tiny glyph; clicking it restores the full badge. */
-  minimized: boolean
 }
 
 const KEY = 'dsh:peak-valley:prefs:v1'
 
-const DEFAULTS: PeakValleyPrefs = { corner: 'bottom-right', sound: true, minimized: false }
+const DEFAULTS: PeakValleyPrefs = { corner: 'bottom-right', sound: true }
 
 function safeLocalStorage(): Storage | undefined {
   try {
@@ -37,7 +35,6 @@ export function loadPrefs(): PeakValleyPrefs {
     return {
       corner: parsed.corner ?? DEFAULTS.corner,
       sound: parsed.sound ?? DEFAULTS.sound,
-      minimized: parsed.minimized ?? DEFAULTS.minimized,
     }
   } catch {
     return DEFAULTS

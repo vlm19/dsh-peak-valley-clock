@@ -133,43 +133,38 @@ export function computeNextBoundary(now: Date, schedule: TariffSchedule): Date {
   const tz = schedule.timezone
   const nowParts = partsInZone(now, tz)
   const nowMin = nowParts.hour * 60 + nowParts.minute
-  // Build a flat sorted list of boundary (minute-of-day) candidates for today.
-  type Bound = { dayOffset: 0 | 1; min: number; tier: TariffTier }
-  const todays: Bound[] = []
-  for (const w of schedule.windows) {
-    const [sh, sm] = parseHHMM(w.start)
-    const [eh, em] = parseHHMM(w.end)
-    const startMin = sh * 60 + sm
-    const endMin = eh * 60 + em
-    todays.push({ dayOffset: 0, min: startMin, tier: w.tier })
-    if (endMin > startMin) {
-      todays.push({ dayOffset: 0, min: endMin, tier: invertTier(w.tier) })
-    } else {
-      // Cross-midnight: end is on the next day.
-      todays.push({ dayOffset: 0, min: endMin, tier: invertTier(w.tier) })
-      todays.push({ dayOffset: 1, min: 24 * 60, tier: w.tier })
+
+  // A window spans at most one midnight, so boundaries from windows starting
+  // yesterday, today, and tomorrow cover every boundary strictly after `now`.
+  type Bound = { dayOffset: number; min: number; tier: TariffTier }
+  const cands: Bound[] = []
+  for (let day = -1; day <= 1; day++) {
+    for (const w of schedule.windows) {
+      const [sh, sm] = parseHHMM(w.start)
+      const [eh, em] = parseHHMM(w.end)
+      const startMin = sh * 60 + sm
+      const endMin = eh * 60 + em
+      cands.push({ dayOffset: day, min: startMin, tier: w.tier })
+      // Cross-midnight windows end on the following day.
+      cands.push({ dayOffset: endMin > startMin ? day : day + 1, min: endMin, tier: invertTier(w.tier) })
     }
   }
-  // Find the earliest candidate strictly greater than now.
+
+  // Pick the earliest boundary strictly after `now`.
   let best: Bound | undefined
-  for (const b of todays) {
-    if (b.dayOffset === 0 && b.min <= nowMin) continue
-    if (best === undefined || b.dayOffset < best.dayOffset || (b.dayOffset === best.dayOffset && b.min < best.min)) {
-      best = b
+  for (const b of cands) {
+    if (b.dayOffset > 0 || (b.dayOffset === 0 && b.min > nowMin)) {
+      if (best === undefined || b.dayOffset < best.dayOffset || (b.dayOffset === best.dayOffset && b.min < best.min)) {
+        best = b
+      }
     }
   }
-  // Build the instant for `best` (or fall through to 00:00 of tomorrow).
-  const targetParts = nowParts
-  let targetYear = targetParts.year
-  let targetMonth = targetParts.month
-  let targetDay = targetParts.day + (best?.dayOffset ?? 0)
-  // Roll over month/year.
-  const rolled = rollDay(targetYear, targetMonth, targetDay)
-  targetYear = rolled.year
-  targetMonth = rolled.month
-  targetDay = rolled.day
-  const min = best?.min ?? 0
-  return instantFromZone(targetYear, targetMonth, targetDay, Math.floor(min / 60), min % 60, tz)
+
+  // `best` is undefined only when `schedule.windows` is empty (no boundary ever).
+  if (best === undefined) return new Date(now.getTime() + 24 * 60 * 60 * 1000)
+
+  const rolled = rollDay(nowParts.year, nowParts.month, nowParts.day + best.dayOffset)
+  return instantFromZone(rolled.year, rolled.month, rolled.day, Math.floor(best.min / 60), best.min % 60, tz)
 }
 
 function invertTier(t: TariffTier): TariffTier {

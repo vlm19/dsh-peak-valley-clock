@@ -25,10 +25,6 @@ export interface PeakValleyInjected {
   videoFor(tier: TariffTier): string | undefined
   /** Active locale id; re-read on each render. */
   getActiveLocaleId(): 'zh' | 'en'
-  /** Collapsed-to-tiny-glyph flag (from prefs). */
-  isMinimized(): boolean
-  /** Collapse the badge to a tiny glyph. */
-  setMinimized(): void
   /** Read the full engine state (for components that don't want the snapshot). */
   readState(): PeakValleyState
 }

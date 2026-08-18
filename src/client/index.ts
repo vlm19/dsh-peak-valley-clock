@@ -64,8 +64,6 @@ interface Binding {
   prefs: PrefsAdapter
   videoFor(tier: TariffTier): string | undefined
   getActiveLocaleId(): 'zh' | 'en'
-  isMinimized(): boolean
-  setMinimized(): void
   dispose(): void
 }
 
@@ -85,14 +83,8 @@ function createBinding(ctx: ClientContext, config: Required<PeakValleyConfig>, p
     if (raw === undefined || raw === '') return undefined
     return resolveAssetUrl(raw, packageName)
   }
-  function isMinimized(): boolean {
-    return prefs.read().minimized
-  }
-  function setMinimized(): void {
-    prefs.set({ minimized: true })
-  }
   function dispose(): void { engine.dispose() }
-  return { engine, prefs, videoFor, getActiveLocaleId, isMinimized, setMinimized, dispose }
+  return { engine, prefs, videoFor, getActiveLocaleId, dispose }
 }
 
 /** Required services: locale (dictionaries), slots (overlay registration). */
@@ -123,8 +115,6 @@ export function apply(ctx: ClientContext): void {
           prefs: binding.prefs,
           videoFor: binding.videoFor,
           getActiveLocaleId: binding.getActiveLocaleId,
-          isMinimized: binding.isMinimized,
-          setMinimized: binding.setMinimized,
           readState: binding.engine.getState,
         }),
       } as never,

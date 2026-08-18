@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { PeakValleyInjected } from './slots.ts'
 import type { Corner } from './stores.ts'
-import { formatClockInZone, formatDurationEn, formatDurationZh, type PeakValleyKey } from './locales.ts'
+import { formatDurationEn, formatDurationZh, type PeakValleyKey } from './locales.ts'
 import type { PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './Panel.module.css'
 
@@ -17,30 +17,13 @@ export interface PanelProps extends PeakValleyInjected, PropsLocale<'peakvalley'
 }
 
 export function Panel(props: PanelProps): JSX.Element | null {
-  const { engine, prefs, t, videoFor, getActiveLocaleId, isMinimized, setMinimized } = props
+  const { engine, prefs, t, videoFor, getActiveLocaleId } = props
 
   const state = useSyncExternalStore(engine.subscribe, engine.getState)
   const prefsRev = useSyncExternalStore(prefs.subscribe, prefs.getSnapshot)
 
   const tier = state.status.tier
   const glyph = tier === 'peak' ? '峰' : '谷'
-
-  // Minimized: a tiny glyph that keeps tracking the tier, click to restore.
-  if (isMinimized()) {
-    return (
-      <div className={css.panel} data-corner={prefs.read().corner ?? props.defaultCorner} data-tier={tier}>
-        <button
-          type="button"
-          className={css.miniBadge}
-          aria-label={t((tier === 'peak' ? 'badge.peak.aria' : 'badge.offpeak.aria') as PeakValleyKey)}
-          title={t((tier === 'peak' ? 'badge.peak.aria' : 'badge.offpeak.aria') as PeakValleyKey)}
-          onClick={() => prefs.set({ minimized: false })}
-        >
-          {glyph}
-        </button>
-      </div>
-    )
-  }
   const [hovering, setHovering] = useState(false)
   const [playing, setPlaying] = useState<'idle' | 'in' | 'out'>('idle')
   const [corner, setCorner] = useState<Corner>(prefs.read().corner ?? props.defaultCorner)
@@ -71,10 +54,6 @@ export function Panel(props: PanelProps): JSX.Element | null {
   function handleMuteToggle(ev: React.MouseEvent): void {
     ev.stopPropagation()
     prefs.set({ sound: !prefs.read().sound })
-  }
-  function handleMinimize(ev: React.MouseEvent): void {
-    ev.stopPropagation()
-    setMinimized()
   }
   function handleDragStart(ev: React.PointerEvent): void {
     const target = ev.currentTarget as HTMLElement
@@ -165,31 +144,11 @@ export function Panel(props: PanelProps): JSX.Element | null {
 
       {hovering && playing === 'idle' && (
         <div className={css.card} role="dialog" aria-label={t('card.title.' + tier as PeakValleyKey)}>
-          <div className={css.cardTitle}>
-            <span className={css.cardDot} />
-            {t('card.title.' + tier as PeakValleyKey)} · {t('card.remaining', { duration: durationStr })}
-          </div>
-          <div className={css.cardMeta}>
-            {t('card.next', {
-              when: formatClockInZone(state.status.nextBoundary, state.schedule.timezone, localeId),
+          <div className={css.cardCountdown}>
+            {t('card.countdown' as PeakValleyKey, {
               next: t(('card.next.' + (tier === 'peak' ? 'offpeak' : 'peak')) as PeakValleyKey),
+              duration: durationStr,
             })}
-          </div>
-          {state.schedule.prices.slice(0, 2).map((p: typeof state.schedule.prices[number]) => (
-            <div key={p.modelId}>
-              <div className={css.cardPriceHead}>{p.label}</div>
-              <div className={css.cardPriceRow}>
-                <span>{t('card.price.cacheHit' as PeakValleyKey)}</span>
-                <span>{t('card.price.perMillion' as PeakValleyKey, { value: p.cacheHit })}</span>
-                <span>{t('card.price.cacheMiss' as PeakValleyKey)}</span>
-                <span>{t('card.price.perMillion' as PeakValleyKey, { value: p.cacheMiss })}</span>
-                <span>{t('card.price.output' as PeakValleyKey)}</span>
-                <span>{t('card.price.perMillion' as PeakValleyKey, { value: p.output })}</span>
-              </div>
-            </div>
-          ))}
-          <div className={css.cardActions}>
-            <button type="button" onClick={handleMinimize}>{t('card.minimize' as PeakValleyKey)}</button>
           </div>
         </div>
       )}

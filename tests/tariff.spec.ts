@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_SCHEDULE, computeNextBoundary, parseHHMM, partsInZone,
-  resolveTier, TIER_COLORS, TIER_GLYPH } from '../src/tariff.ts'
+  resolveTier, TIER_COLORS, TIER_GLYPH, type TariffSchedule } from '../src/tariff.ts'
 
 const SCHEDULE = DEFAULT_SCHEDULE
 
@@ -97,6 +97,29 @@ describe('computeNextBoundary', () => {
     const next = computeNextBoundary(shaTime(2026, 8, 18, 0, 30), SCHEDULE)
     const p = partsInZone(next, 'Asia/Shanghai')
     expect(p).toMatchObject({ day: 18, hour: 9, minute: 0 })
+  })
+  it('from 19:00 (after the last window), next boundary rolls to 09:00 next day', () => {
+    const next = computeNextBoundary(shaTime(2026, 8, 18, 19, 0), SCHEDULE)
+    const p = partsInZone(next, 'Asia/Shanghai')
+    expect(p).toMatchObject({ day: 19, hour: 9, minute: 0 })
+  })
+})
+
+describe('computeNextBoundary (cross-midnight window)', () => {
+  const CROSS: TariffSchedule = {
+    timezone: 'Asia/Shanghai',
+    windows: [{ start: '23:00', end: '01:00', tier: 'peak' }],
+    prices: [],
+  }
+  it('from 23:30, next boundary is 01:00 next day', () => {
+    const next = computeNextBoundary(shaTime(2026, 8, 18, 23, 30), CROSS)
+    const p = partsInZone(next, 'Asia/Shanghai')
+    expect(p).toMatchObject({ day: 19, hour: 1, minute: 0 })
+  })
+  it('from 00:30, next boundary is 01:00 same day', () => {
+    const next = computeNextBoundary(shaTime(2026, 8, 18, 0, 30), CROSS)
+    const p = partsInZone(next, 'Asia/Shanghai')
+    expect(p).toMatchObject({ day: 18, hour: 1, minute: 0 })
   })
 })
 

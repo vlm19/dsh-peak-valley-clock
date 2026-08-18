@@ -9,15 +9,9 @@ export const zh = {
   'badge.offpeak.aria': '当前为空闲计费时段，点击查看视频',
   'card.title.peak': '高峰时段',
   'card.title.offpeak': '空闲时段',
-  'card.remaining': '剩余 {duration}',
-  'card.next': '{when} 后进入{next}',
+  'card.countdown': '{duration} 后进入{next}',
   'card.next.peak': '高峰',
   'card.next.offpeak': '空闲',
-  'card.price.cacheHit': '缓存命中输入',
-  'card.price.cacheMiss': '输入（未命中）',
-  'card.price.output': '输出',
-  'card.price.perMillion': '{value} 元/百万tokens',
-  'card.minimize': '最小化',
   'mute.on': '点击静音',
   'mute.off': '点击开启声音',
   'mute.aria': '声音开关',
@@ -33,15 +27,9 @@ export const en: Record<PeakValleyKey, string> = {
   'badge.offpeak.aria': 'Off-peak pricing now. Click to view video.',
   'card.title.peak': 'Peak hours',
   'card.title.offpeak': 'Off-peak hours',
-  'card.remaining': '{duration} remaining',
-  'card.next': '{next} pricing at {when}',
+  'card.countdown': '{next} in {duration}',
   'card.next.peak': 'peak',
   'card.next.offpeak': 'off-peak',
-  'card.price.cacheHit': 'Cache-hit input',
-  'card.price.cacheMiss': 'Input (miss)',
-  'card.price.output': 'Output',
-  'card.price.perMillion': '{value} / 1M tokens',
-  'card.minimize': 'Minimize',
   'mute.on': 'Mute',
   'mute.off': 'Unmute',
   'mute.aria': 'Sound toggle',
@@ -72,15 +60,4 @@ export function formatDurationEn(ms: number): string {
   if (h === 0) return `${m} min`
   if (m === 0) return `${h}h`
   return `${h}h ${m}m`
-}
-
-/** Clock formatter (HH:MM, 24h) in the schedule timezone, for the card subtitle. */
-export function formatClockInZone(date: Date, timezone: string, lang: 'zh' | 'en'): string {
-  try {
-    return new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-GB', {
-      timeZone: timezone, hour12: false, hour: '2-digit', minute: '2-digit',
-    }).format(date)
-  } catch {
-    return ''
-  }
 }

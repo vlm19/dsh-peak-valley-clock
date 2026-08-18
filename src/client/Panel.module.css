@@ -55,43 +55,6 @@
   outline-offset: 2px;
 }
 
-.miniBadge {
-  width: 22px;
-  height: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  padding: 0;
-  background: var(--peak-bg);
-  color: var(--peak-fg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
-  opacity: 0.85;
-  transition: transform 150ms ease, opacity 150ms ease;
-}
-
-.panel[data-tier='offpeak'] .miniBadge {
-  background: var(--valley-bg);
-  color: var(--valley-fg);
-}
-
-.miniBadge:hover {
-  transform: scale(1.18);
-  opacity: 1;
-}
-
-.miniBadge:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.85);
-  outline-offset: 2px;
-}
-
 .badgeTransition {
   animation: tierFade 300ms ease;
 }
@@ -187,9 +150,8 @@
   position: absolute;
   bottom: calc(100% + 12px);
   right: 0;
-  min-width: 260px;
   max-width: 320px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: 12px;
   background: rgba(20, 20, 24, 0.78);
   color: #f5f5f5;
@@ -211,65 +173,11 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
-.cardTitle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.cardCountdown {
   font-weight: 600;
   font-size: 13px;
-  margin-bottom: 6px;
+  white-space: nowrap;
 }
-
-.cardDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--peak-bg);
-}
-
-.panel[data-tier='offpeak'] .cardDot { background: var(--valley-bg); }
-
-.cardMeta {
-  opacity: 0.7;
-  font-size: 11px;
-  margin-bottom: 8px;
-}
-
-.cardPriceRow {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px 8px;
-  font-variant-numeric: tabular-nums;
-  font-size: 11.5px;
-  margin-top: 4px;
-}
-
-.cardPriceHead {
-  grid-column: 1 / -1;
-  font-weight: 600;
-  opacity: 0.8;
-  margin-top: 6px;
-}
-
-.cardActions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  justify-content: flex-end;
-}
-
-.cardActions button {
-  background: transparent;
-  color: rgba(255,255,255,0.85);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 6px;
-  font-size: 11px;
-  padding: 4px 8px;
-  cursor: pointer;
-}
-
-.cardActions button:hover { background: rgba(255,255,255,0.08); }
-.cardActions button:focus-visible { outline: 2px solid rgba(255,255,255,0.85); outline-offset: 1px; }
 
 .handle {
   position: absolute;
