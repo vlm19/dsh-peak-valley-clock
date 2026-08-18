@@ -20,7 +20,7 @@
 - 启动时**只显示徽章**——不自动播放视频,不打扰。
 - 运行中跨越峰/谷边界时,**仅切换汉字与配色**,不会重播视频(除非你点击)。
 - 悬停徽章可查看卡片:下一次边界时间、各模型单价。
-- 拖动徽章到任意角落;角落、声音、"今日隐藏"等选择持久化在 `localStorage`。
+- 拖动徽章到任意角落;角落、声音、"最小化"等选择持久化在 `localStorage`。点「最小化」缩成小字徽章(仍随峰谷换字换色),点小字即恢复。
 
 > **关于"透明背景"。** 内置的 `feng.mp4` / `gu.mp4` 是由**网上的 AI 照片生成的影像**(非真人、非实拍),且背景不透明(不是绿幕),因此弹层采用圆角 + 毛玻璃面板,而非真正的透明视频背景。见*已知限制*。
 
@@ -37,18 +37,25 @@
 1. 克隆 DeepSeek Harness 与本仓库。
 2. 把本包复制(或作为 git submodule)进 harness 工作区,例如放到
    `packages/community/dsh-peak-valley-clock`(匹配 `packages/*/*` 工作区通配)。
-3. 在 harness 根目录执行:
+3. 在 harness 里做**三处注册**(否则构建不编译它、启动时 resolver 也找不到它):
+   - `tsconfig.client.json` 的 `references` 加
+     `{ "path": "./packages/community/dsh-peak-valley-clock" }`——让 `build:lib:client` 的
+     `tsc -b` 编译它(否则 tsdown 报缺 `lib/types/client/index.js`)。
+   - `tsconfig.base.json` 的 `paths` 加
+     `"dsh-peak-valley-clock": ["./packages/community/dsh-peak-valley-clock/src"]`——让 tsx 源码启动
+     与 `verify-cordis-config` 能解析到源码(本包无 scope,不命中 `@deepseek-ai/dsh-*` 通配)。
+   - `packages/bundle/web-app/package.json` 的 `dependencies` 加
+     `"dsh-peak-valley-clock": "workspace:^"`——让运行时的 cordis resolver 能解析这个包名。
+4. 在 harness 根目录执行:
 
    ```sh
    pnpm install
    pnpm run build:lib:client        # 构建所有 client 包,含本包
    ```
 
-4. 用示例 overlay 挂载插件并启动:
+5. 用示例 overlay 挂载插件并启动:
 
    ```sh
-   pnpm dsh --profile web --patch dsh-peak-valley-clock/example/cordis.yml
-   # 或若复制到 packages/community 下:
    pnpm dsh --profile web --patch packages/community/dsh-peak-valley-clock/example/cordis.yml
    ```
 
@@ -65,7 +72,7 @@ harness 的 web 模块会加载 `/plugins/dsh-peak-valley-clock/client.js`,插�
 | `videoPeak`     | `feng.mp4`         | 高峰视频的资源路径/URL。绝对路径、`/`-根路径,或相对于 `/plugins/<pkg>/assets/` 的相对路径。 |
 | `videoOffpeak`  | `gu.mp4`           | 同上,低谷视频。                                                      |
 | `corner`        | `bottom-right`     | 初始角落:`top-left` / `top-right` / `bottom-left` / `bottom-right`。 |
-| `defaultSound`  | `true`             | 点击播放的视频是否默认带声。                                        |
+| `defaultSound`  | `false`            | 点击播放的视频是否默认带声(默认静音;视频右上角有醒目的喇叭按钮,点击开声)。 |
 
 ### 替换视频
 
@@ -124,8 +131,9 @@ non-intrusive `shell.overlay` area, color-coded by tier. Clicking the badge play
 - Crossing a peak/off-peak boundary while running only swaps the glyph + color; it does **not**
   replay the video unless you click.
 - Hover the badge for a card with the next boundary time and per-model prices.
-- Drag the badge to any corner; your corner, sound, and "hide for today" choices persist in
-  `localStorage`.
+- Drag the badge to any corner; your corner, sound, and "minimize" choices persist in
+  `localStorage`. "Minimize" collapses the badge to a tiny glyph (still tracking the tier);
+  click the glyph to restore.
 
 > **Note on transparency.** The bundled `feng.mp4` / `gu.mp4` are **AI-generated clips derived from
 > online AI photos (no real-person likeness)**, with opaque (non-green-screen) backgrounds, so the
@@ -146,18 +154,26 @@ This is the supported path today.
 1. Clone DeepSeek Harness and this repo.
 2. Copy (or git-submodule) this package into the harness workspace, e.g. under
    `packages/community/dsh-peak-valley-clock` (matches the `packages/*/*` workspace glob).
-3. From the harness root:
+3. Make **three registrations** in the harness (otherwise the build skips it and the resolver
+   cannot find it at launch):
+   - Add `{ "path": "./packages/community/dsh-peak-valley-clock" }` to `references` in
+     `tsconfig.client.json` — so `build:lib:client`'s `tsc -b` compiles it (otherwise tsdown
+     fails on the missing `lib/types/client/index.js`).
+   - Add `"dsh-peak-valley-clock": ["./packages/community/dsh-peak-valley-clock/src"]` to `paths`
+     in `tsconfig.base.json` — so the tsx source launch and `verify-cordis-config` resolve to
+     source (the package is unscoped and does not match the `@deepseek-ai/dsh-*` wildcard).
+   - Add `"dsh-peak-valley-clock": "workspace:^"` to `dependencies` in
+     `packages/bundle/web-app/package.json` — so the runtime cordis resolver can resolve the name.
+4. From the harness root:
 
    ```sh
    pnpm install
    pnpm run build:lib:client        # builds every client package, including this one
    ```
 
-4. Mount the plugin with the example overlay and launch:
+5. Mount the plugin with the example overlay and launch:
 
    ```sh
-   pnpm dsh --profile web --patch dsh-peak-valley-clock/example/cordis.yml
-   # or, if copied under packages/community:
    pnpm dsh --profile web --patch packages/community/dsh-peak-valley-clock/example/cordis.yml
    ```
 
@@ -175,7 +191,7 @@ plugin entry (cordis config shape):
 | `videoPeak`    | `feng.mp4`   | Asset path/URL for the peak clip. Absolute, `/`-rooted, or relative to `/plugins/<pkg>/assets/`. |
 | `videoOffpeak` | `gu.mp4`     | Same, for the off-peak clip.                                  |
 | `corner`       | `bottom-right` | Initial corner: `top-left` / `top-right` / `bottom-left` / `bottom-right`. |
-| `defaultSound` | `true`       | Whether the click-to-play video starts with sound on.        |
+| `defaultSound` | `false`      | Whether the click-to-play video starts with sound on (muted by default; a prominent speaker button opens it). |
 
 ### Swapping the videos
 

@@ -20,7 +20,7 @@ export type { PeakValleyInjected } from './slots.ts'
 export type { PeakValleyEngine, PeakValleyState } from './tariff-engine.ts'
 export { createTariffEngine } from './tariff-engine.ts'
 export { createPrefsAdapter } from './prefs-adapter.ts'
-export { loadPrefs, savePrefs, shouldHide } from './stores.ts'
+export { loadPrefs, savePrefs } from './stores.ts'
 export type { PeakValleyPrefs } from './stores.ts'
 export type { PeakValleyKey } from './locales.ts'
 
@@ -47,7 +47,7 @@ const DEFAULT_CONFIG: Required<PeakValleyConfig> = {
   videoPeak: 'feng.mp4',
   videoOffpeak: 'gu.mp4',
   corner: 'bottom-right',
-  defaultSound: true,
+  defaultSound: false,
 }
 
 const PACKAGE_NAME = 'dsh-peak-valley-clock'
@@ -64,8 +64,8 @@ interface Binding {
   prefs: PrefsAdapter
   videoFor(tier: TariffTier): string | undefined
   getActiveLocaleId(): 'zh' | 'en'
-  isHidden(): boolean
-  setHidden(): void
+  isMinimized(): boolean
+  setMinimized(): void
   dispose(): void
 }
 
@@ -85,28 +85,18 @@ function createBinding(ctx: ClientContext, config: Required<PeakValleyConfig>, p
     if (raw === undefined || raw === '') return undefined
     return resolveAssetUrl(raw, packageName)
   }
-  function isHidden(): boolean {
-    const p = prefs.read()
-    if (p.hideUntil === null) return false
-    const today = new Date()
-    const y = today.getFullYear()
-    const m = String(today.getMonth() + 1).padStart(2, '0')
-    const d = String(today.getDate()).padStart(2, '0')
-    return p.hideUntil >= `${y}-${m}-${d}`
+  function isMinimized(): boolean {
+    return prefs.read().minimized
   }
-  function setHidden(): void {
-    const today = new Date()
-    const y = today.getFullYear()
-    const m = String(today.getMonth() + 1).padStart(2, '0')
-    const d = String(today.getDate()).padStart(2, '0')
-    prefs.set({ hideUntil: `${y}-${m}-${d}` })
+  function setMinimized(): void {
+    prefs.set({ minimized: true })
   }
   function dispose(): void { engine.dispose() }
-  return { engine, prefs, videoFor, getActiveLocaleId, isHidden, setHidden, dispose }
+  return { engine, prefs, videoFor, getActiveLocaleId, isMinimized, setMinimized, dispose }
 }
 
-/** Required services: locale, runtime (for slots, theme). */
-export const inject = ['slots', 'locale', 'runtime']
+/** Required services: locale (dictionaries), slots (overlay registration). */
+export const inject = ['slots', 'locale']
 
 export function apply(ctx: ClientContext): void {
   const config: Required<PeakValleyConfig> = { ...DEFAULT_CONFIG }
@@ -133,8 +123,8 @@ export function apply(ctx: ClientContext): void {
           prefs: binding.prefs,
           videoFor: binding.videoFor,
           getActiveLocaleId: binding.getActiveLocaleId,
-          isHidden: binding.isHidden,
-          setHidden: binding.setHidden,
+          isMinimized: binding.isMinimized,
+          setMinimized: binding.setMinimized,
           readState: binding.engine.getState,
         }),
       } as never,

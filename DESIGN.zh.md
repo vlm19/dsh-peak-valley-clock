@@ -159,7 +159,7 @@ resolveTier(schedule, now: Date): { tier; nextBoundary: Date; msRemaining }
       name: 'dsh-peak-valley-clock'
 ```
 
-三种用法：`pnpm dsh --profile web --patch example/cordis.yml`（参见本仓库 example/）；加入 profile 的 bundle 列表；或 `pnpm dsh plugin --profile web add dsh-peak-valley-clock`。包需出现在对应 resolver manifest 的 `dependencies`（`verify-cordis-config` 强制）。
+三种用法：`pnpm dsh --profile web --patch example/cordis.yml`（参见本仓库 example/）；加入 profile 的 bundle 列表；或 `pnpm dsh plugin --profile web add dsh-peak-valley-clock`。在工作区内安装需三处注册：① `tsconfig.client.json` 的 `references`（让 `tsc -b` 编译本包）；② `tsconfig.base.json` 的 `paths`（让 tsx 源码启动与 `verify-cordis-config` 解析到源码）；③ resolver manifest（`web-app`）的 `dependencies`（让运行时解析包名，`verify-cordis-config` 强制）。详见 README 的安装一节。
 
 ## 7. 配置项（schemastery Config）
 

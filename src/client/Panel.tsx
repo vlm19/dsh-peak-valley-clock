@@ -17,14 +17,30 @@ export interface PanelProps extends PeakValleyInjected, PropsLocale<'peakvalley'
 }
 
 export function Panel(props: PanelProps): JSX.Element | null {
-  const { engine, prefs, t, videoFor, getActiveLocaleId, isHidden, setHidden } = props
+  const { engine, prefs, t, videoFor, getActiveLocaleId, isMinimized, setMinimized } = props
 
   const state = useSyncExternalStore(engine.subscribe, engine.getState)
   const prefsRev = useSyncExternalStore(prefs.subscribe, prefs.getSnapshot)
 
-  if (isHidden()) return null
-
   const tier = state.status.tier
+  const glyph = tier === 'peak' ? '峰' : '谷'
+
+  // Minimized: a tiny glyph that keeps tracking the tier, click to restore.
+  if (isMinimized()) {
+    return (
+      <div className={css.panel} data-corner={prefs.read().corner ?? props.defaultCorner} data-tier={tier}>
+        <button
+          type="button"
+          className={css.miniBadge}
+          aria-label={t((tier === 'peak' ? 'badge.peak.aria' : 'badge.offpeak.aria') as PeakValleyKey)}
+          title={t((tier === 'peak' ? 'badge.peak.aria' : 'badge.offpeak.aria') as PeakValleyKey)}
+          onClick={() => prefs.set({ minimized: false })}
+        >
+          {glyph}
+        </button>
+      </div>
+    )
+  }
   const [hovering, setHovering] = useState(false)
   const [playing, setPlaying] = useState<'idle' | 'in' | 'out'>('idle')
   const [corner, setCorner] = useState<Corner>(prefs.read().corner ?? props.defaultCorner)
@@ -35,7 +51,6 @@ export function Panel(props: PanelProps): JSX.Element | null {
   const colors = tier === 'peak'
     ? { glow: 'rgba(180, 83, 9, 0.45)' }
     : { glow: 'rgba(15, 118, 110, 0.45)' }
-  const glyph = tier === 'peak' ? '峰' : '谷'
 
   useEffect(() => { setCorner(prefs.read().corner ?? props.defaultCorner) }, [prefsRev, props.defaultCorner, prefs])
   useEffect(() => {
@@ -57,13 +72,9 @@ export function Panel(props: PanelProps): JSX.Element | null {
     ev.stopPropagation()
     prefs.set({ sound: !prefs.read().sound })
   }
-  function handleHideToday(ev: React.MouseEvent): void {
+  function handleMinimize(ev: React.MouseEvent): void {
     ev.stopPropagation()
-    setHidden()
-  }
-  function handleDisable(ev: React.MouseEvent): void {
-    ev.stopPropagation()
-    prefs.set({ hideUntil: '9999-12-31' })
+    setMinimized()
   }
   function handleDragStart(ev: React.PointerEvent): void {
     const target = ev.currentTarget as HTMLElement
@@ -142,6 +153,7 @@ export function Panel(props: PanelProps): JSX.Element | null {
           <button
             type="button"
             className={css.muteBtn}
+            data-muted={!sound}
             aria-label={t((sound ? 'mute.on' : 'mute.off') as PeakValleyKey)}
             title={t((sound ? 'mute.on' : 'mute.off') as PeakValleyKey)}
             onClick={handleMuteToggle}
@@ -177,8 +189,7 @@ export function Panel(props: PanelProps): JSX.Element | null {
             </div>
           ))}
           <div className={css.cardActions}>
-            <button type="button" onClick={handleHideToday}>{t('card.hide.today' as PeakValleyKey)}</button>
-            <button type="button" onClick={handleDisable}>{t('card.disable' as PeakValleyKey)}</button>
+            <button type="button" onClick={handleMinimize}>{t('card.minimize' as PeakValleyKey)}</button>
           </div>
         </div>
       )}

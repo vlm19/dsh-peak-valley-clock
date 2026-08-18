@@ -1,8 +1,7 @@
 /**
  * Client-side persistent preferences for the peak/valley reminder. Persists
- * to localStorage so the user's corner/sound/dismissal choices survive reloads.
- * Stays inside a single localStorage key to keep the surface small and the
- * HMR-aware: we re-read on every effect.
+ * to localStorage so the user's corner/sound/minimize choices survive reloads.
+ * Stays inside a single localStorage key to keep the surface small.
  */
 
 export type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
@@ -12,13 +11,13 @@ export interface PeakValleyPrefs {
   corner: Corner
   /** Last user-picked sound state. */
   sound: boolean
-  /** Local-date string (YYYY-MM-DD in local zone) until which the badge is hidden. */
-  hideUntil: string | null
+  /** Collapsed to a tiny glyph; clicking it restores the full badge. */
+  minimized: boolean
 }
 
 const KEY = 'dsh:peak-valley:prefs:v1'
 
-const DEFAULTS: PeakValleyPrefs = { corner: 'bottom-right', sound: true, hideUntil: null }
+const DEFAULTS: PeakValleyPrefs = { corner: 'bottom-right', sound: true, minimized: false }
 
 function safeLocalStorage(): Storage | undefined {
   try {
@@ -38,7 +37,7 @@ export function loadPrefs(): PeakValleyPrefs {
     return {
       corner: parsed.corner ?? DEFAULTS.corner,
       sound: parsed.sound ?? DEFAULTS.sound,
-      hideUntil: parsed.hideUntil ?? null,
+      minimized: parsed.minimized ?? DEFAULTS.minimized,
     }
   } catch {
     return DEFAULTS
@@ -53,17 +52,4 @@ export function savePrefs(prefs: PeakValleyPrefs): void {
   } catch {
     /* quota / private mode — silently ignore */
   }
-}
-
-export function todayLocal(): string {
-  const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-export function shouldHide(prefs: PeakValleyPrefs): boolean {
-  if (prefs.hideUntil === null) return false
-  return prefs.hideUntil >= todayLocal()
 }
