@@ -62,6 +62,11 @@
 harness 的 web 模块会加载 `/plugins/dsh-peak-valley-clock/client.js`,插件的 node half 会注册
 `/plugins/dsh-peak-valley-clock/assets/*` 来伺服视频。
 
+> **Windows 快捷脚本。** 完成上面第 1–3 步后,也可以直接双击(或从任意目录运行)
+> `example/setup.bat`:它会自动定位 harness 根目录,依次执行 `pnpm install`、
+> `pnpm run build:lib:client`,然后用本插件的示例 overlay 启动 dsh web——等价于第 4、5 步。
+> Linux/macOS 用户请照第 4、5 步的命令执行。
+
 ### 配置
 
 示例 `cordis.yml` 以默认值挂载插件。如需覆盖,在插件条目下传入 config(cordis 配置形态):
@@ -179,6 +184,11 @@ This is the supported path today.
 
 The harness's web module loads `/plugins/dsh-peak-valley-clock/client.js`, and the plugin's
 node half registers `/plugins/dsh-peak-valley-clock/assets/*` to serve the videos.
+
+> **Windows helper script.** After steps 1–3, you can also double-click (or run from any
+> directory) `example/setup.bat`: it locates the harness root automatically, then runs
+> `pnpm install`, `pnpm run build:lib:client`, and launches dsh web with this plugin's example
+> overlay — equivalent to steps 4 and 5. Linux/macOS users: just run the step 4/5 commands.
 
 ### Configuration
 
