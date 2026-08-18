@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# This plugin depends on the (currently unpublished) DeepSeek Harness workspace, so
+# verification runs INSIDE a harness checkout. Pin the harness ref before relying on it.
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      # 1) Checkout DeepSeek Harness at a known-good commit/tag.
+      #    Update `ref` to the harness version you validate against.
+      - name: Checkout deepseek-harness
+        uses: actions/checkout@v4
+        with:
+          repository: deepseek-ai/deepseek-harness
+          path: harness
+          ref: v0.1.0-rc.5
+
+      # 2) Drop this plugin into the harness workspace (packages/*/* glob).
+      - name: Copy plugin into the harness workspace
+        run: |
+          mkdir -p harness/packages/community/dsh-peak-valley-clock
+          cp -r src tests assets example package.json tsconfig.json tsdown.config.ts \
+                vitest.config.ts LICENSE README.md DESIGN.zh.md \
+                harness/packages/community/dsh-peak-valley-clock/
+
+      # 3) Install + build the harness (resolves @deepseek-ai/* from the workspace).
+      - name: Install
+        working-directory: harness
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Typecheck
+        working-directory: harness
+        run: pnpm --filter dsh-peak-valley-clock typecheck
+
+      - name: Test
+        working-directory: harness
+        run: pnpm --filter dsh-peak-valley-clock test

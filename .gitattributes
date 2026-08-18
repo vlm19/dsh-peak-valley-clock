@@ -1,0 +1,4 @@
+# Bundled video assets are stored in Git LFS so clones stay small.
+# Requires `git lfs install` in any clone that needs the real .mp4 files
+# (CI / consumers that only read source don't need to pull LFS objects).
+*.mp4 filter=lfs diff=lfs merge=lfs -text

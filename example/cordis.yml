@@ -1,0 +1,10 @@
+# Opt-in Peak/Valley reminder overlay over the shipped Web composition.
+# Mount the plugin into the Web profile; everything else (assets, schedule,
+# config) is read from the plugin's own defaults.
+#
+# Usage (from a deepseek-harness checkout that has this package in its workspace):
+#   pnpm dsh --profile web --patch example/cordis.yml
+
+- insert:
+    - id: peak-valley-clock
+      name: 'dsh-peak-valley-clock'
